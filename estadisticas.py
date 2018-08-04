@@ -5,7 +5,8 @@
 # El ejercicio consiste en la creacion de una aplicacion sencilla que se conecte
 # a un web service y descargue la informacion en un archivo de texto o tabla.
 # El web service a utilizar es http://67.203.240.172/L103WS.asmx. Los campos
-# de informacion que este web service presenta son
+# de informacion que este web service presenta son:
+
 #
 # NU_ENTIDAD RG_TRANS RG_COL RG_ROW RG_VALUE CYYYYMM TRANS_FILETYPE
 #
