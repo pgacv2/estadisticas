@@ -19,19 +19,47 @@ import sys
 # Module for abstracting the SOAP interface.
 import zeep
 
-parser = argparse.ArgumentParser()
-parser.add_argument('-v', '--verbose', action='store_true', help='Verbose')
-args = parser.parse_args()
 
+month_range = range(1, 13, 1)
+year_range = range(2007, 2019, 1)
+format_types = ['csv', 'text']
+
+# Read args from the command line, or prompt the user if they are not provided.
+parser = argparse.ArgumentParser()
+parser.add_argument('-v', '--verbose', action='store_true')
+parser.add_argument('--format', choices=format_types)
+discrete_date = parser.add_mutually_exclusive_group()
+
+discrete_date.add_argument('--month', type=int, choices=month_range)
+discrete_date.add_argument('--year', type=int, choices=year_range)
+
+args = parser.parse_args()
+if args.year:
+    year = args.year
+    month = args.month
+elif args.month:
+    parser.error('A month must be accompanied by a year')
+else:
+
+
+# Set up logging.
 log = logging.getLogger('stats')
 handler = logging.StreamHandler(sys.stdout)
 log.addHandler(handler)
 if args.verbose:
     log.setLevel(logging.DEBUG)
     handler.setLevel(logging.DEBUG)
+else:
+    log.setLevel(logging.INFO)
+    handler.setLevel(logging.INFO)
 
 client = zeep.Client('http://67.203.240.172/L103WS.asmx?WSDL')
+
+log.debug('Calling 103 mes')
 x = client.service.DatosLey103Mes('10', '2010')
+
+log.debug('Calling 103')
 y = client.service.DatosLey103('2010')
+
 print(dir(x))
 print(dir(y))
