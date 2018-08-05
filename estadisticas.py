@@ -30,7 +30,7 @@ exit_values = ['E', 'e']
 # Read args from the command line, or prompt the user if they are not provided.
 parser = argparse.ArgumentParser()
 parser.add_argument('-v', '--verbose', action='store_true')
-parser.add_argument('--format', choices=format_types)
+parser.add_argument('--format', choices=format_types, default='txt')
 parser.add_argument('--month', type=int, choices=month_range)
 parser.add_argument('--year', type=int, choices=year_range)
 parser.add_argument('--output-file', type=argparse.FileType('w', encoding='utf-8'))
@@ -52,15 +52,13 @@ if args.verbose:
     log.setLevel(logging.DEBUG)
     handler.setLevel(logging.DEBUG)
 else:
-    log.setLevel(logging.INFO)
-    handler.setLevel(logging.INFO)
+    log.setLevel(logging.WARNING)
+    handler.setLevel(logging.WARNING)
 
 Query = lib.StatsData('http://67.203.240.172/L103WS.asmx?WSDL')
+data = Query.get_data(args.year, args.month)
+formatter = lib.DataFormatter('txt')
 
-log.debug('Calling 103 mes')
-x = client.service.DatosLey103Mes('2010', '02')
-print(dir(x))
-
-log.debug('Calling 103')
-y = client.service.DatosLey103('2010')
-print(dir(y))
+print(formatter.format_header(data[0]))
+for x in data:
+    print(formatter.format_row(x))

@@ -1,9 +1,14 @@
+import collections
 import concurrent.futures
+import csv
+import io
 import logging
 
 # Module for abstracting the SOAP interface.
 import zeep
 
+# A namedtuple is useful for keeping the field names in order.
+Record = collections.namedtuple('Record', 'NU_ENTIDAD RG_TRANS RG_COL RG_ROW RG_VALUE CYYYYMM TRANS_FILETYPE')
 
 class StatsData:
     def __init__(self, wsdl):
@@ -20,8 +25,8 @@ class StatsData:
         # ('DatosWsspMes'). The value of that key is the actual result we want.
         # I'm guessing 'NU_ENTIDAD' is the record ID, so sort by that field so the
         # user gets nicely ordered results.
-        real_results = [x['DatosWsspMes'] for x in results._value_1._value_1]
-        sorted_results = sorted(real_results, key=lambda x: x['NU_ENTIDAD'])
+        real_results = [Record(**x['DatosWsspMes']) for x in results._value_1._value_1]
+        sorted_results = sorted(real_results, key=lambda x: x.NU_ENTIDAD)
         return sorted_results
 
     def get_data(self, year, month=None):
@@ -53,3 +58,25 @@ class StatsData:
         for mth in months_to_fetch:
             sorted_results += results[mth]
         return sorted_results
+
+
+class DataFormatter:
+    """Formatter class.
+
+    'txt' format is space-delimited with a width of 10.
+    'csv' format is comma-delimited."""
+    def __init__(self, fmt):
+        self.format = fmt
+
+    def _delimit(self, values):
+        delimited_string = ''
+        if self.format == 'txt':
+            for val in values:
+                delimited_string += '{value: <10}'.format(value=val)
+        return delimited_string + '\n'
+
+    def format_header(self, record):
+        return self._delimit(record._fields)
+
+    def format_row(self, record):
+        return self._delimit(record)
