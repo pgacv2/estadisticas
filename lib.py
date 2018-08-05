@@ -67,7 +67,7 @@ class StatsData:
 class DataFormatter:
     """Formatter class.
 
-    'txt' format is space-delimited with a width of 10.
+    'txt' format is space-delimited with a width of 14. Some of those decimals are pretty long.
     'csv' format is comma-delimited."""
     def __init__(self, fmt):
         self.format = fmt
@@ -76,8 +76,8 @@ class DataFormatter:
         delimited_string = ''
         if self.format == 'txt':
             for val in values:
-                delimited_string += '{value: <10}'.format(value=val)
-        return delimited_string + '\n'
+                delimited_string += '{value: <14}'.format(value=val)
+        return delimited_string
 
     def format_header(self, record):
         return self._delimit(record._fields)
