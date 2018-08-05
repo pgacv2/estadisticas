@@ -1,3 +1,4 @@
+#!/usr/bin/python3
 # Coding exercise for a position at the Instituto de Estadisticas
 # Pedro G. Acevedo
 # 2018-08-03
@@ -17,13 +18,14 @@ import argparse
 import logging
 import sys
 
-# Module for abstracting the SOAP interface.
-import zeep
-
+import lib
 
 month_range = range(1, 13, 1)
 year_range = range(2007, 2019, 1)
 format_types = ['csv', 'txt']
+yes_values = ['Y', 'y']
+no_values = ['N', 'n']
+exit_values = ['E', 'e']
 
 # Read args from the command line, or prompt the user if they are not provided.
 parser = argparse.ArgumentParser()
@@ -43,7 +45,7 @@ else:
     pass
 
 # Set up logging.
-log = logging.getLogger('stats')
+log = logging.getLogger('estadisticas')
 handler = logging.StreamHandler(sys.stdout)
 log.addHandler(handler)
 if args.verbose:
@@ -53,7 +55,7 @@ else:
     log.setLevel(logging.INFO)
     handler.setLevel(logging.INFO)
 
-client = zeep.Client('http://67.203.240.172/L103WS.asmx?WSDL')
+Query = lib.StatsData('http://67.203.240.172/L103WS.asmx?WSDL')
 
 log.debug('Calling 103 mes')
 x = client.service.DatosLey103Mes('2010', '02')
