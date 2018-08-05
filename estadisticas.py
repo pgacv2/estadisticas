@@ -23,16 +23,15 @@ import zeep
 
 month_range = range(1, 13, 1)
 year_range = range(2007, 2019, 1)
-format_types = ['csv', 'text']
+format_types = ['csv', 'txt']
 
 # Read args from the command line, or prompt the user if they are not provided.
 parser = argparse.ArgumentParser()
 parser.add_argument('-v', '--verbose', action='store_true')
 parser.add_argument('--format', choices=format_types)
-discrete_date = parser.add_mutually_exclusive_group()
-
-discrete_date.add_argument('--month', type=int, choices=month_range)
-discrete_date.add_argument('--year', type=int, choices=year_range)
+parser.add_argument('--month', type=int, choices=month_range)
+parser.add_argument('--year', type=int, choices=year_range)
+parser.add_argument('--output-file', type=argparse.FileType('w', encoding='utf-8'))
 
 args = parser.parse_args()
 if args.year:
@@ -41,7 +40,7 @@ if args.year:
 elif args.month:
     parser.error('A month must be accompanied by a year')
 else:
-
+    pass
 
 # Set up logging.
 log = logging.getLogger('stats')
@@ -57,10 +56,9 @@ else:
 client = zeep.Client('http://67.203.240.172/L103WS.asmx?WSDL')
 
 log.debug('Calling 103 mes')
-x = client.service.DatosLey103Mes('10', '2010')
+x = client.service.DatosLey103Mes('2010', '02')
+print(dir(x))
 
 log.debug('Calling 103')
 y = client.service.DatosLey103('2010')
-
-print(dir(x))
 print(dir(y))
