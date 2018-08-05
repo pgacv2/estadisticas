@@ -23,9 +23,13 @@ class StatsData:
         # The real results are a few layers down. The first _value_1 is a wrapper,
         # and the second _value_1 is a list of dictionaries that have a single key
         # ('DatosWsspMes'). The value of that key is the actual result we want.
+        # That value, however, is not a real mapping (some zeep object), so "cast"
+        # it to a dictionary first and then make a tuple out of it.
+        #
         # I'm guessing 'NU_ENTIDAD' is the record ID, so sort by that field so the
         # user gets nicely ordered results.
-        real_results = [Record(**x['DatosWsspMes']) for x in results._value_1._value_1]
+        real_results = [Record(**{field: x['DatosWsspMes'][field] for field in dir(x['DatosWsspMes'])})
+                        for x in results._value_1._value_1]
         sorted_results = sorted(real_results, key=lambda x: x.NU_ENTIDAD)
         return sorted_results
 
