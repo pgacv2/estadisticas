@@ -30,7 +30,7 @@ parser.add_argument('--year', type=int, choices=lib.year_range,
                          'specified). If this argument is not specified, the tool will run interactively '
                          'and prompt the user for each argument.')
 parser.add_argument('--month', type=int, choices=lib.month_range)
-parser.add_argument('--format', choices=lib.format_types, default='txt')
+parser.add_argument('--format', type=str.lower, choices=lib.format_types, default='txt')
 # Default '-' value = stdout.
 parser.add_argument('--output-file', type=argparse.FileType('w', encoding='utf-8'), default='-')
 parser.add_argument('-v', '--verbose', action='store_true')
