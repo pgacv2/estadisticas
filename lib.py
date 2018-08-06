@@ -106,8 +106,9 @@ def interactive_menu():
 
 def prompt_for_another_query():
     response = None
+    print('Query complete.')
     while response not in quit_values and response != '':
-        print('Query complete. Press Enter to run another query', quit_prompt)
+        print('Press Enter to run another query', quit_prompt)
         response = input().strip().lower()
         if response in quit_values:
             return False

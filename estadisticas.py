@@ -31,11 +31,14 @@ parser.add_argument('--year', type=int, choices=lib.year_range,
                          'arguments supplied at the command line (or their defaults, if any of them are not '
                          'specified). If this argument is not specified, the tool will run interactively '
                          'and prompt the user for each argument.')
-parser.add_argument('--month', type=int, choices=lib.month_range)
-parser.add_argument('--format', type=str.lower, choices=lib.format_types, default='txt')
-parser.add_argument('--output-file', type=lib.validate_path)
-parser.add_argument('-v', '--verbose', action='store_true')
-
+parser.add_argument('--month', type=int, choices=lib.month_range,
+                    help='Which month (in the specified --year) to fetch data for.')
+parser.add_argument('--format', type=str.lower, choices=lib.format_types, default='txt',
+                    help='Output the data in either CSV or space-delimited format.')
+parser.add_argument('--output-file', type=lib.validate_path,
+                    help='The file in which the data will be saved. If omitted, the data will be written '
+                         'to stdout.')
+parser.add_argument('--verbose', action='store_true', help='Verbose debugging log messages.')
 args = parser.parse_args()
 
 # Set up logging.
