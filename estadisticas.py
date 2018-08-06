@@ -65,6 +65,8 @@ while True:
         args = lib.interactive_menu()
         if not args:
             break
+    elif not args.output_file:
+        args.output_file = sys.stdout
 
     results = query.get_data(args.year, args.month)
 
