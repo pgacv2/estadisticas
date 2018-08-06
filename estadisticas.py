@@ -7,7 +7,6 @@
 # a un web service y descargue la informacion en un archivo de texto o tabla.
 # El web service a utilizar es http://67.203.240.172/L103WS.asmx. Los campos
 # de informacion que este web service presenta son:
-
 #
 # NU_ENTIDAD RG_TRANS RG_COL RG_ROW RG_VALUE CYYYYMM TRANS_FILETYPE
 #
@@ -21,6 +20,7 @@ import sys
 
 import lib
 
+
 # Read args from the command line, or prompt the user if they are not provided.
 parser = argparse.ArgumentParser(description='Tool for downloading data from the Instituto de Estadisticas '
                                  'web service')
@@ -31,8 +31,7 @@ parser.add_argument('--year', type=int, choices=lib.year_range,
                          'and prompt the user for each argument.')
 parser.add_argument('--month', type=int, choices=lib.month_range)
 parser.add_argument('--format', type=str.lower, choices=lib.format_types, default='txt')
-# Default '-' value = stdout.
-parser.add_argument('--output-file', type=argparse.FileType('w', encoding='utf-8'), default='-')
+parser.add_argument('--output-file', type=lib.validate_path)
 parser.add_argument('-v', '--verbose', action='store_true')
 
 args = parser.parse_args()
@@ -52,18 +51,21 @@ else:
 interactive_mode = False
 if not args.year:
     interactive_mode = True
+log.debug('Interactive mode: {}'.format(interactive_mode))
 
+# Start the event loop.
+query = lib.StatsData('http://67.203.240.172/L103WS.asmx?WSDL')
 while True:
     if interactive_mode:
         args = lib.interactive_menu()
         if not args:
             break
 
-    query = lib.StatsData('http://67.203.240.172/L103WS.asmx?WSDL')
     results = query.get_data(args.year, args.month)
 
     # In either format, first write the column headers, which we get from
     # the namedtuple structure. Then write everything else.
+    log.debug('Starting output')
     if args.format == 'txt':
         args.output_file.write(lib.format_space_delimited(results[0]._fields))
         for record in results:
@@ -73,6 +75,7 @@ while True:
         writer.writerow(results[0]._fields)
         writer.writerows(results)
 
+    log.debug('Closing file handle to {}'.format(args.output_file.name))
     if args.output_file != sys.stdout:
         args.output_file.close()
 

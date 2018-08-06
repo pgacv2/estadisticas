@@ -6,10 +6,10 @@ import sys
 # Module for abstracting the SOAP interface.
 import zeep
 
-# A namedtuple is useful for keeping the field names in order.
+# A namedtuple keeps the field names in order when printing to CSV.
+# We also use it to store arguments that the user provides interactively
+# with fields that match the command-line argument names.
 Record = collections.namedtuple('Record', 'NU_ENTIDAD RG_TRANS RG_COL RG_ROW RG_VALUE CYYYYMM TRANS_FILETYPE')
-
-# It is also useful for storing argument values that the user provides interactively.
 UserValues = collections.namedtuple('UserValues', 'year month format output_file')
 
 month_range = range(1, 13, 1)
@@ -19,7 +19,18 @@ quit_values = ['q', 'quit']
 quit_prompt = 'or enter [Q]uit to quit the application.'
 
 
+def validate_path(path):
+    """Check that the output file the user selected is writable and return a handle to it.
+
+    We can't use argparse's FileType to validate the path because it doesn't
+    take the newline argument that we need in order to suppress the extra
+    blank lines in the CSV output. So we need to manually add the newline
+    to each line in the space-delimited output."""
+    return open(path, 'w', encoding='utf-8')
+
+
 def interactive_menu():
+    """Prompt the user for values."""
     year = None
     month = None
     fmt = None
@@ -78,7 +89,7 @@ def interactive_menu():
             output_file = sys.stdout
         else:
             try:
-                output_file = open(path, 'w', encoding='utf-8')
+                output_file = validate_path(path)
             except OSError as e:
                 print('{} is not writable because: {}'.format(path, e))
 
@@ -111,9 +122,9 @@ class StatsData:
         self.log = logging.getLogger('estadisticas')
         self.wsdl = wsdl
 
-    def _soap_query(self, wsdl, year, month):
+    def _soap_query(self, year, month):
         """The actual SOAP call."""
-        client = zeep.Client(wsdl)
+        client = zeep.Client(self.wsdl)
         results = client.service.DatosLey103Mes(str(year), str(month).zfill(2))
 
         # The real results are a few layers down. The first _value_1 is a wrapper,
@@ -122,7 +133,7 @@ class StatsData:
         # That value, however, is not a real mapping (some zeep object), so "cast"
         # it to a dictionary first and then make a tuple out of it.
         #
-        # I'm guessing 'NU_ENTIDAD' is the record ID, so sort by that field so the
+        # 'NU_ENTIDAD' seems to be the record ID, so sort by that field so the
         # user gets nicely ordered results.
         real_results = [Record(**{field: x['DatosWsspMes'][field] for field in dir(x['DatosWsspMes'])})
                         for x in results._value_1._value_1]
@@ -134,7 +145,9 @@ class StatsData:
 
         Spawn at least one thread, regardless of how much data is requested.
         If the user wants a whole year, spawn twelve threads (one per month)
-        for better performance."""
+        for better performance: >60 minutes one thread for the whole year
+        calling DatosLey103() vs. ~14 minutes calling 12 instances of
+        DatosLey103Mes()."""
         if month:
             months_to_fetch = [month]
         else:
@@ -161,27 +174,3 @@ class StatsData:
         for mth in months_to_fetch:
             sorted_results += results[mth]
         return sorted_results
-
-
-class DataFormatter:
-    """Formatter class.
-
-    'txt' format is space-delimited with a width of 14 by default. (Some of those
-    decimals are pretty long.) 'csv' format is comma-delimited. The column width
-    is ignored in the CSV format."""
-    def __init__(self, fmt, column_width=14):
-        self.format = fmt
-        self.column_width = column_width
-
-    def _delimit(self, values):
-        delimited_string = ''
-        if self.format == 'txt':
-            for val in values:
-                delimited_string += '{value: <{col_width}}'.format(value=val, col_width=self.column_width)
-        return delimited_string
-
-    def format_header(self, record):
-        return self._delimit(record._fields)
-
-    def format_row(self, record):
-        return self._delimit(record)
