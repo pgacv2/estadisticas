@@ -28,12 +28,20 @@ class TestEstadisticas(unittest.TestCase):
         mock_zeep.Client.return_value = mock_client = mock.MagicMock()
         mock_client.service.DatosLey103Mes.return_value = mock_data
 
-        mock_user_values = ['bad year', '2010', 'bad month', '4', 'bad format', 'txt', '']
-
         self.patches.append(mock.patch('lib.zeep', mock_zeep))
 
         for p in self.patches:
             p.start()
+
+    def test_get_data(self):
+        query_object = lib.StatsData('dummy wsdl')
+        # The mock data has two records per month, so one month of results
+        # should return two records, and 12 months should return 24.
+        results = query_object.get_data(1234)
+        self.assertEqual(24, len(results))
+        self.assertEqual('value 2', results[1].RG_VALUE)
+        results = query_object.get_data(1234, 5)
+        self.assertEqual(2, len(results))
 
     def test_validate_path_fails_on_nonexistent_path(self):
         with self.assertRaises(OSError):
@@ -46,3 +54,7 @@ class TestEstadisticas(unittest.TestCase):
     def tearDown(self):
         for p in self.patches:
             p.stop()
+
+
+if __name__ == '__main__':
+    unittest.main()

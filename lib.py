@@ -1,6 +1,7 @@
 import collections
 import concurrent.futures
 import logging
+import os
 import sys
 
 # Module for abstracting the SOAP interface.
@@ -9,7 +10,8 @@ import zeep
 # A namedtuple keeps the field names in order when printing to CSV.
 # We also use it to store arguments that the user provides interactively
 # with fields that match the command-line argument names.
-Record = collections.namedtuple('Record', 'NU_ENTIDAD RG_TRANS RG_COL RG_ROW RG_VALUE CYYYYMM TRANS_FILETYPE')
+_response_field_names = ['NU_ENTIDAD', 'RG_TRANS', 'RG_COL', 'RG_ROW', 'RG_VALUE', 'CYYYYMM', 'TRANS_FILETYPE']
+Record = collections.namedtuple('Record', _response_field_names)
 UserValues = collections.namedtuple('UserValues', 'year month format output_file')
 
 month_range = range(1, 13, 1)
@@ -26,7 +28,7 @@ def validate_path(path):
     take the newline argument that we need in order to suppress the extra
     blank lines in the CSV output. So we need to manually add the newline
     to each line in the space-delimited output."""
-    return open(path, 'w', encoding='utf-8', newline='')
+    return open(os.path.abspath(path), 'w', encoding='utf-8', newline='')
 
 
 def interactive_menu():
@@ -135,7 +137,7 @@ class StatsData:
         #
         # 'NU_ENTIDAD' seems to be the record ID, so sort by that field so the
         # user gets nicely ordered results.
-        real_results = [Record(**{field: x['DatosWsspMes'][field] for field in dir(x['DatosWsspMes'])})
+        real_results = [Record(**{field: x['DatosWsspMes'][field] for field in _response_field_names})
                         for x in results._value_1._value_1]
         sorted_results = sorted(real_results, key=lambda x: x.NU_ENTIDAD)
         return sorted_results
