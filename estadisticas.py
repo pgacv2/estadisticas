@@ -15,6 +15,7 @@
 # en este, y permitir su descarga en formato de texto plano (.txt) o CSV.
 
 import argparse
+import csv
 import logging
 import sys
 
@@ -30,7 +31,7 @@ parser.add_argument('--year', type=int, choices=lib.year_range,
                          'and prompt the user for each argument.')
 parser.add_argument('--month', type=int, choices=lib.month_range)
 parser.add_argument('--format', choices=lib.format_types, default='txt')
-# Default '-' value == stdout.
+# Default '-' value = stdout.
 parser.add_argument('--output-file', type=argparse.FileType('w', encoding='utf-8'), default='-')
 parser.add_argument('-v', '--verbose', action='store_true')
 
@@ -58,13 +59,24 @@ while True:
         if not args:
             break
 
-    Query = lib.StatsData('http://67.203.240.172/L103WS.asmx?WSDL')
-    data = Query.get_data(args.year, args.month)
-    formatter = lib.DataFormatter(args.format)
+    query = lib.StatsData('http://67.203.240.172/L103WS.asmx?WSDL')
+    results = query.get_data(args.year, args.month)
 
-    print(formatter.format_header(data[0]))
-    for x in data:
-        print(formatter.format_row(x))
+    # In either format, first write the column headers, which we get from
+    # the namedtuple structure. Then write everything else.
+    if args.format == 'txt':
+        args.output_file.write(lib.format_space_delimited(results[0]._fields))
+        for record in results:
+            args.output_file.write(lib.format_space_delimited(record))
+    else:
+        writer = csv.writer(args.output_file)
+        writer.writerow(results[0]._fields)
+        writer.writerows(results)
 
-    if not interactive_mode:
+    if args.output_file != sys.stdout:
+        args.output_file.close()
+
+    if interactive_mode and lib.prompt_for_another_query():
+        continue
+    else:
         break

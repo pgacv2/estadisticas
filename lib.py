@@ -1,7 +1,5 @@
 import collections
 import concurrent.futures
-import csv
-import io
 import logging
 import sys
 
@@ -18,15 +16,16 @@ month_range = range(1, 13, 1)
 year_range = range(2007, 2019, 1)
 format_types = ['csv', 'txt']
 quit_values = ['q', 'quit']
+quit_prompt = 'or enter [Q]uit to quit the application.'
 
 
 def interactive_menu():
-    quit_prompt = 'or enter [Q]uit to quit the application.'
     year = None
     month = None
     fmt = None
     output_file = None
 
+    print()
     while year not in year_range:
         print('Enter a year between {} and {} (inclusive)'.format(min(year_range), max(year_range)),
               quit_prompt)
@@ -41,6 +40,7 @@ def interactive_menu():
             except ValueError:
                 print('That is not a valid year.')
 
+    print()
     while month not in month_range and month != '':
         print('Enter a month between {} and {} (inclusive), leave it blank to fetch '
               'data for the whole year,'.format(min(month_range), max(year_range)),
@@ -58,12 +58,16 @@ def interactive_menu():
             except ValueError:
                 print('That is not a valid month.')
 
+    print()
     while fmt not in format_types:
         print('Enter one of the following formats {}'.format(format_types), quit_prompt)
         fmt = input().strip().lower()
         if fmt in quit_values:
             return None
+        elif fmt not in format_types:
+            print('That is not a valid format.')
 
+    print()
     while not output_file:
         print('Enter the path to save the data, leave it blank to output to stdout,',
               quit_prompt)
@@ -78,7 +82,28 @@ def interactive_menu():
             except OSError as e:
                 print('{} is not writable because: {}'.format(path, e))
 
+    print()
     return UserValues(year=year, month=month, format=fmt, output_file=output_file)
+
+
+def prompt_for_another_query():
+    response = None
+    while response not in quit_values and response != '':
+        print('Press Enter to run another query', quit_prompt)
+        response = input().strip().lower()
+        if response in quit_values:
+            return False
+        elif response == '':
+            return True
+        else:
+            continue
+
+
+def format_space_delimited(values, column_width=14):
+    delimited_string = ''
+    for val in values:
+        delimited_string += '{value: <{col_width}}'.format(value=val, col_width=column_width)
+    return delimited_string + '\n'
 
 
 class StatsData:
