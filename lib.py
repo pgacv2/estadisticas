@@ -16,7 +16,7 @@ month_range = range(1, 13, 1)
 year_range = range(2007, 2019, 1)
 format_types = ['csv', 'txt']
 quit_values = ['q', 'quit']
-quit_prompt = 'or enter [Q]uit to quit the application.'
+quit_prompt = 'or enter [Q]uit to quit the application:'
 
 
 def validate_path(path):
@@ -26,7 +26,7 @@ def validate_path(path):
     take the newline argument that we need in order to suppress the extra
     blank lines in the CSV output. So we need to manually add the newline
     to each line in the space-delimited output."""
-    return open(path, 'w', encoding='utf-8')
+    return open(path, 'w', encoding='utf-8', newline='')
 
 
 def interactive_menu():
@@ -100,7 +100,7 @@ def interactive_menu():
 def prompt_for_another_query():
     response = None
     while response not in quit_values and response != '':
-        print('Press Enter to run another query', quit_prompt)
+        print('Query complete. Press Enter to run another query', quit_prompt)
         response = input().strip().lower()
         if response in quit_values:
             return False
