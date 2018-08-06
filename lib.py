@@ -13,6 +13,71 @@ Record = collections.namedtuple('Record', 'NU_ENTIDAD RG_TRANS RG_COL RG_ROW RG_
 # It is also useful for storing argument values that the user provides interactively.
 UserValues = collections.namedtuple('UserValues', 'year month format output_file')
 
+month_range = range(1, 13, 1)
+year_range = range(2007, 2019, 1)
+format_types = ['csv', 'txt']
+quit_values = ['q', 'quit']
+
+
+def interactive_menu():
+    quit_prompt = 'or enter [Q]uit to quit the application.'
+    year = None
+    month = None
+    fmt = None
+    output_file = None
+
+    while year not in year_range:
+        print('Enter a year between {} and {} (inclusive)'.format(min(year_range), max(year_range)))
+        print(quit_prompt)
+        year = input().strip().lower()
+        if year in quit_values:
+            return None
+        else:
+            try:
+                year = int(year)
+                if year not in year_range:
+                    raise ValueError
+            except ValueError:
+                print('That is not a valid year.')
+
+    while month not in month_range and month != '':
+        print('Enter a month between {} and {} (inclusive), press Enter to fetch data '
+              'for the whole year,'.format(min(month_range), max(year_range)))
+        print(quit_prompt)
+        month = input().strip().lower()
+        if month in quit_values:
+            return None
+        elif month == '':
+            break
+        else:
+            try:
+                month = int(month)
+                if month not in month_range:
+                    raise ValueError
+            except ValueError:
+                print('That is not a valid month.')
+
+    while fmt not in format_types:
+        print('Enter one of the following formats {}'.format(format_types))
+        print(quit_prompt)
+        fmt = input().strip().lower()
+        if fmt in quit_values:
+            return None
+
+    while not output_file:
+        print('Enter the path to save the data, press Enter to output to stdout,')
+        print(quit_prompt)
+        path = input().strip()
+        if path in quit_values:
+            return None
+        else:
+            try:
+                output_file = open(path, 'w', encoding='utf-8')
+            except OSError as e:
+                print('{} is not writable because: {}'.format(path, e))
+
+    return UserValues(year=year, month=month, format=fmt, output_file=output_file)
+
 
 class StatsData:
     def __init__(self, wsdl):

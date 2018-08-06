@@ -15,29 +15,21 @@
 # en este, y permitir su descarga en formato de texto plano (.txt) o CSV.
 
 import argparse
-import enum
 import logging
 import sys
 
 import lib
 
-month_range = range(1, 13, 1)
-year_range = range(2007, 2019, 1)
-format_types = ['csv', 'txt']
-yes_values = ['Y', 'y']
-no_values = ['N', 'n']
-quit_values = ['Q', 'q']
-
 # Read args from the command line, or prompt the user if they are not provided.
 parser = argparse.ArgumentParser(description='Tool for downloading data from the Instituto de Estadisticas '
                                  'web service')
-parser.add_argument('--year', type=int, choices=year_range,
+parser.add_argument('--year', type=int, choices=lib.year_range,
                     help='If this argument is specified, the tool will run non-interactively with any other '
                          'arguments supplied at the command line (or their defaults, if any of them are not '
                          'specified). If this argument is not specified, the tool will run interactively '
                          'and prompt the user for each argument.')
-parser.add_argument('--month', type=int, choices=month_range)
-parser.add_argument('--format', choices=format_types, default='txt')
+parser.add_argument('--month', type=int, choices=lib.month_range)
+parser.add_argument('--format', choices=lib.format_types, default='txt')
 # Default '-' value == stdout.
 parser.add_argument('--output-file', type=argparse.FileType('w', encoding='utf-8'), default='-')
 parser.add_argument('-v', '--verbose', action='store_true')
@@ -59,12 +51,20 @@ else:
 interactive_mode = False
 if not args.year:
     interactive_mode = True
-    args = interactive_menu()
 
-Query = lib.StatsData('http://67.203.240.172/L103WS.asmx?WSDL')
-data = Query.get_data(args.year, args.month)
-formatter = lib.DataFormatter(args.format)
+while True:
+    if interactive_mode:
+        args = lib.interactive_menu()
+        if not args:
+            break
 
-print(formatter.format_header(data[0]))
-for x in data:
-    print(formatter.format_row(x))
+    Query = lib.StatsData('http://67.203.240.172/L103WS.asmx?WSDL')
+    data = Query.get_data(args.year, args.month)
+    formatter = lib.DataFormatter(args.format)
+
+    print(formatter.format_header(data[0]))
+    for x in data:
+        print(formatter.format_row(x))
+
+    if not interactive_mode:
+        break
