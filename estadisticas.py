@@ -69,7 +69,7 @@ while True:
         for record in results:
             args.output_file.write(lib.format_space_delimited(record))
     else:
-        writer = csv.writer(args.output_file)
+        writer = csv.writer(args.output_file, newline='')
         writer.writerow(results[0]._fields)
         writer.writerows(results)
 

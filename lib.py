@@ -25,8 +25,8 @@ def interactive_menu():
     fmt = None
     output_file = None
 
-    print()
     while year not in year_range:
+        print()
         print('Enter a year between {} and {} (inclusive)'.format(min(year_range), max(year_range)),
               quit_prompt)
         year = input().strip().lower()
@@ -40,10 +40,10 @@ def interactive_menu():
             except ValueError:
                 print('That is not a valid year.')
 
-    print()
     while month not in month_range and month != '':
+        print()
         print('Enter a month between {} and {} (inclusive), leave it blank to fetch '
-              'data for the whole year,'.format(min(month_range), max(year_range)),
+              'data for the whole year,'.format(min(month_range), max(month_range)),
               quit_prompt)
         month = input().strip().lower()
         if month in quit_values:
@@ -58,8 +58,8 @@ def interactive_menu():
             except ValueError:
                 print('That is not a valid month.')
 
-    print()
     while fmt not in format_types:
+        print()
         print('Enter one of the following formats {}'.format(format_types), quit_prompt)
         fmt = input().strip().lower()
         if fmt in quit_values:
@@ -67,8 +67,8 @@ def interactive_menu():
         elif fmt not in format_types:
             print('That is not a valid format.')
 
-    print()
     while not output_file:
+        print()
         print('Enter the path to save the data, leave it blank to output to stdout,',
               quit_prompt)
         path = input().strip()
