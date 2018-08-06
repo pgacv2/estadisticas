@@ -122,9 +122,9 @@ class StatsData:
         self.log = logging.getLogger('estadisticas')
         self.wsdl = wsdl
 
-    def _soap_query(self, year, month):
+    def _soap_query(self, wsdl, year, month):
         """The actual SOAP call."""
-        client = zeep.Client(self.wsdl)
+        client = zeep.Client(wsdl)
         results = client.service.DatosLey103Mes(str(year), str(month).zfill(2))
 
         # The real results are a few layers down. The first _value_1 is a wrapper,
