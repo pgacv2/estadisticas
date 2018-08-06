@@ -87,7 +87,8 @@ def interactive_menu():
 
     while not output_file:
         print()
-        print('Enter the path to save the data, leave it blank to output to stdout,',
+        print('Enter the path to save the data, leave it blank to display the data onscreen '
+              '(not recommended due to the high volume of data),',
               quit_prompt)
         path = input().strip()
         if path in quit_values:

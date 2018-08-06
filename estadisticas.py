@@ -36,8 +36,8 @@ parser.add_argument('--month', type=int, choices=lib.month_range,
 parser.add_argument('--format', type=str.lower, choices=lib.format_types, default='txt',
                     help='Output the data in either CSV or space-delimited format.')
 parser.add_argument('--output-file', type=lib.validate_path,
-                    help='The file in which the data will be saved. If omitted, the data will be written '
-                         'to stdout.')
+                    help='The file in which the data will be saved. If omitted, the data will be displayed '
+                         'onscreen. (Not recommended due to the high volume of data.)')
 parser.add_argument('--verbose', action='store_true', help='Verbose debugging log messages.')
 args = parser.parse_args()
 
