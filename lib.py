@@ -1,3 +1,8 @@
+####################################################################
+# Coding exercise for a position at the Instituto de Estadisticas  #
+# Pedro G. Acevedo                                                 #
+####################################################################
+
 import collections
 import concurrent.futures
 import logging

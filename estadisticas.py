@@ -1,8 +1,10 @@
 #!/usr/bin/python3
-# Coding exercise for a position at the Instituto de Estadisticas
-# Pedro G. Acevedo
-# 2018-08-03
-#
+
+####################################################################
+# Coding exercise for a position at the Instituto de Estadisticas  #
+# Pedro G. Acevedo                                                 #
+####################################################################
+
 # El ejercicio consiste en la creacion de una aplicacion sencilla que se conecte
 # a un web service y descargue la informacion en un archivo de texto o tabla.
 # El web service a utilizar es http://67.203.240.172/L103WS.asmx. Los campos

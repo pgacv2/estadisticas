@@ -1,4 +1,8 @@
-import io
+####################################################################
+# Coding exercise for a position at the Instituto de Estadisticas  #
+# Pedro G. Acevedo                                                 #
+####################################################################
+
 import os
 import unittest
 import unittest.mock as mock
