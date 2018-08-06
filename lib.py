@@ -140,13 +140,9 @@ class StatsData:
         # ('DatosWsspMes'). The value of that key is the actual result we want.
         # That value, however, is not a real mapping (some zeep object), so "cast"
         # it to a dictionary first and then make a tuple out of it.
-        #
-        # 'NU_ENTIDAD' seems to be the record ID, so sort by that field so the
-        # user gets nicely ordered results.
         real_results = [Record(**{field: x['DatosWsspMes'][field] for field in _response_field_names})
                         for x in results._value_1._value_1]
-        sorted_results = sorted(real_results, key=lambda x: x.NU_ENTIDAD)
-        return sorted_results
+        return real_results
 
     def get_data(self, year, month=None):
         """Thread manager for each query.
@@ -177,7 +173,7 @@ class StatsData:
                 except Exception as exc:
                     self.log.warning('Could not fetch data for {}-{} because: {}'.format(year, mth, exc))
 
-        # Now sort again, this time by date.
+        # Sort the results by month.
         sorted_results = []
         for mth in months_to_fetch:
             sorted_results += results[mth]
