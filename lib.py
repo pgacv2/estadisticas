@@ -3,6 +3,7 @@ import concurrent.futures
 import csv
 import io
 import logging
+import sys
 
 # Module for abstracting the SOAP interface.
 import zeep
@@ -27,8 +28,8 @@ def interactive_menu():
     output_file = None
 
     while year not in year_range:
-        print('Enter a year between {} and {} (inclusive)'.format(min(year_range), max(year_range)))
-        print(quit_prompt)
+        print('Enter a year between {} and {} (inclusive)'.format(min(year_range), max(year_range)),
+              quit_prompt)
         year = input().strip().lower()
         if year in quit_values:
             return None
@@ -41,9 +42,9 @@ def interactive_menu():
                 print('That is not a valid year.')
 
     while month not in month_range and month != '':
-        print('Enter a month between {} and {} (inclusive), press Enter to fetch data '
-              'for the whole year,'.format(min(month_range), max(year_range)))
-        print(quit_prompt)
+        print('Enter a month between {} and {} (inclusive), leave it blank to fetch '
+              'data for the whole year,'.format(min(month_range), max(year_range)),
+              quit_prompt)
         month = input().strip().lower()
         if month in quit_values:
             return None
@@ -58,18 +59,19 @@ def interactive_menu():
                 print('That is not a valid month.')
 
     while fmt not in format_types:
-        print('Enter one of the following formats {}'.format(format_types))
-        print(quit_prompt)
+        print('Enter one of the following formats {}'.format(format_types), quit_prompt)
         fmt = input().strip().lower()
         if fmt in quit_values:
             return None
 
     while not output_file:
-        print('Enter the path to save the data, press Enter to output to stdout,')
-        print(quit_prompt)
+        print('Enter the path to save the data, leave it blank to output to stdout,',
+              quit_prompt)
         path = input().strip()
         if path in quit_values:
             return None
+        elif path == '':
+            output_file = sys.stdout
         else:
             try:
                 output_file = open(path, 'w', encoding='utf-8')
