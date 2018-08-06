@@ -10,6 +10,10 @@ import zeep
 # A namedtuple is useful for keeping the field names in order.
 Record = collections.namedtuple('Record', 'NU_ENTIDAD RG_TRANS RG_COL RG_ROW RG_VALUE CYYYYMM TRANS_FILETYPE')
 
+# It is also useful for storing argument values that the user provides interactively.
+UserValues = collections.namedtuple('UserValues', 'year month format output_file')
+
+
 class StatsData:
     def __init__(self, wsdl):
         self.log = logging.getLogger('estadisticas')
@@ -47,15 +51,18 @@ class StatsData:
 
         results = {}
         with concurrent.futures.ThreadPoolExecutor(max_workers=len(months_to_fetch)) as executor:
-            threads = {executor.submit(self._soap_query, self.wsdl, year, mth): mth for mth in months_to_fetch}
+            threads = {}
+            for mth in months_to_fetch:
+                threads[executor.submit(self._soap_query, self.wsdl, year, mth)] = mth
+                self.log.debug('Spawned thread for {}-{}'.format(year, mth))
+
             for thread in concurrent.futures.as_completed(threads):
                 mth = threads[thread]
                 try:
                     results[mth] = thread.result()
+                    self.log.debug('Downloaded data for {}-{}'.format(year, mth))
                 except Exception as exc:
-                    self.log.warning('Could not fetch data for {year}-{month} because: {exc}'.format(year=year,
-                                                                                                     month=mth,
-                                                                                                     exc=exc))
+                    self.log.warning('Could not fetch data for {}-{} because: {}'.format(year, mth, exc))
 
         # Now sort again, this time by date.
         sorted_results = []
@@ -67,16 +74,18 @@ class StatsData:
 class DataFormatter:
     """Formatter class.
 
-    'txt' format is space-delimited with a width of 14. Some of those decimals are pretty long.
-    'csv' format is comma-delimited."""
-    def __init__(self, fmt):
+    'txt' format is space-delimited with a width of 14 by default. (Some of those
+    decimals are pretty long.) 'csv' format is comma-delimited. The column width
+    is ignored in the CSV format."""
+    def __init__(self, fmt, column_width=14):
         self.format = fmt
+        self.column_width = column_width
 
     def _delimit(self, values):
         delimited_string = ''
         if self.format == 'txt':
             for val in values:
-                delimited_string += '{value: <14}'.format(value=val)
+                delimited_string += '{value: <{col_width}}'.format(value=val, col_width=self.column_width)
         return delimited_string
 
     def format_header(self, record):
